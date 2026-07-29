@@ -44,3 +44,9 @@ Green #8EC63D, black #101010, ink #2C2C2A, pale green #F4F9EA,
 paper #FAFAF8. Helvetica/Arial. The 3px green rule under the header and the
 stage-card style (black numbered badge, green left border) mirror the printed
 Luxe document pack. The app should look like the paperwork.
+
+## Tooling notes
+
+- If working in Claude Code, install the Vercel plugin first:
+  `npx plugins add vercel/vercel-plugin`. Parked at M0, not needed for
+  chat-based sessions.
