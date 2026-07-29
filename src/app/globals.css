@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+:root {
+  --luxe-green: #8ec63d;
+  --luxe-black: #101010;
+  --luxe-ink: #2c2c2a;
+  --luxe-pale: #f4f9ea;
+  --luxe-paper: #fafaf8;
+}
+
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  background: var(--luxe-paper);
+  color: var(--luxe-ink);
+}
