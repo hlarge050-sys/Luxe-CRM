@@ -17,7 +17,7 @@ export default async function AppLayout({
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="bg-[#101010]">
-        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
           <div className="flex items-center gap-2.5">
             <Image
               src="/logo.png"
@@ -43,12 +43,18 @@ export default async function AppLayout({
       </header>
 
       <nav className="border-b border-neutral-200 bg-white">
-        <div className="mx-auto flex max-w-3xl items-center gap-5 px-5">
+        <div className="mx-auto flex max-w-6xl items-center gap-5 px-5">
           <Link
             href="/"
             className="py-2.5 text-sm font-medium text-[#2C2C2A] transition hover:text-[#101010]"
           >
-            Overview
+            Board
+          </Link>
+          <Link
+            href="/contacts"
+            className="py-2.5 text-sm font-medium text-[#2C2C2A] transition hover:text-[#101010]"
+          >
+            Contacts
           </Link>
           <Link
             href="/data"
@@ -56,12 +62,16 @@ export default async function AppLayout({
           >
             Data
           </Link>
+          <Link
+            href="/jobs/new"
+            className="my-1.5 ml-auto rounded-md bg-[#8EC63D] px-3 py-1.5 text-[13px] font-semibold text-[#101010] transition hover:brightness-95"
+          >
+            New enquiry
+          </Link>
         </div>
       </nav>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-10">
-        {children}
-      </main>
+      <main className="w-full flex-1">{children}</main>
 
       <footer className="border-t border-neutral-200 py-6 text-center text-[11px] text-neutral-400">
         Luxe Landscaping Limited | Co. No. 14902951 | Internal

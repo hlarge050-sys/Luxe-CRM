@@ -79,7 +79,7 @@ export default async function DataPage() {
 
   if (!data) {
     return (
-      <div>
+      <div className="mx-auto w-full max-w-3xl px-5 py-10">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
           Raw data
         </p>
@@ -95,7 +95,7 @@ export default async function DataPage() {
   const { stages, contactRows, jobRows, activityRows, followUpCount } = data;
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-3xl px-5 py-10">
       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
         Raw data
       </p>

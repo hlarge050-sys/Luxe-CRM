@@ -6,8 +6,8 @@ Built and accepted milestone by milestone. Owner: Hazz.
 ## Status
 
 Live at https://luxe-crm-peach.vercel.app
-M0 and M1 accepted by Hazz, 30 July 2026. Next up: M2, the job board, not
-started.
+M0 and M1 accepted by Hazz, 30 July 2026. M2 built and deployed 30 July 2026,
+awaiting acceptance by Hazz. Next after acceptance: M3, the follow-up engine.
 Migrations run automatically on deploy (scripts/migrate.mjs), /api/health
 reports db and schema state publicly.
 
@@ -40,12 +40,15 @@ src/app/(app)/layout.tsx. New pages go inside the (app) route group.
 ## Milestones
 
 M0 scaffold (done) · M1 data foundation (done, see src/db/schema.ts)
-· M2 job board kanban · M3 follow-up engine (Inngest)
-· M4 takeoff · M5 pricing engine (pure, versioned function) · M6 quote builder
-· M7 documents (weasyprint) · M8 staged works · M9 Gmail · M10 Calendar.
+· M2 job board kanban (built, awaiting acceptance) · M3 follow-up engine
+(Inngest) · M4 takeoff · M5 pricing engine (pure, versioned function)
+· M6 quote builder · M7 documents (weasyprint) · M8 staged works · M9 Gmail
+· M10 Calendar.
 
-M2 stages: New enquiry, Visit booked, Takeoff done, Quote sent, Follow-up,
-Accepted, In progress, Complete, plus Lost with a required reason.
+M2 stages, in board order: New enquiry, Visit booked, Takeoff done, Quote
+sent, Follow-up, Parked / waiting (added at M2 on Hazz's decision), Accepted,
+In progress, Complete, Lost. Lost demands a reason, enforced in
+src/lib/actions.ts. Stage changes write a stage_change activity.
 
 ## Brand
 

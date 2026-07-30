@@ -1,105 +1,80 @@
+// The job board, the front page of the CRM. Every job, every stage, one
+// glance. Columns come from the job_stages table so the board and the data
+// can never disagree.
 import Link from "next/link";
-import { sql } from "drizzle-orm";
 import { getDb } from "@/db";
+import { Board, type BoardJob, type BoardStage } from "@/components/board/board";
 
 export const dynamic = "force-dynamic";
 
-type Counts = {
-  stages: number;
-  contacts: number;
-  jobs: number;
-  activities: number;
-  follow_ups: number;
-};
+export default async function BoardPage() {
+  // This page is force-dynamic, so this is the time of the request: the
+  // anchor for every days-in-stage chip on the board.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
+  let stages: BoardStage[] = [];
+  let jobs: BoardJob[] = [];
+  let dbDown = false;
 
-async function counts(): Promise<Counts | null> {
   try {
     const db = getDb();
-    const res = await db.execute(sql`select
-      (select count(*) from job_stages)::int as stages,
-      (select count(*) from contacts)::int as contacts,
-      (select count(*) from jobs)::int as jobs,
-      (select count(*) from activities)::int as activities,
-      (select count(*) from follow_ups)::int as follow_ups`);
-    return res.rows[0] as unknown as Counts;
+    const [stageRows, jobRows] = await Promise.all([
+      db.query.jobStages.findMany({
+        orderBy: (t, { asc }) => [asc(t.position)],
+      }),
+      db.query.jobs.findMany({ with: { contact: true } }),
+    ]);
+    stages = stageRows.map((s) => ({
+      id: s.id,
+      name: s.name,
+      position: s.position,
+      isTerminal: s.isTerminal,
+    }));
+    jobs = jobRows.map((j) => ({
+      id: j.id,
+      title: j.title,
+      reference: j.reference,
+      stageId: j.stageId,
+      stageChangedAt: j.stageChangedAt.toISOString(),
+      contactName: j.contact.name,
+      place: j.siteTown ?? j.contact.town ?? j.sitePostcode ?? j.contact.postcode,
+      visitAt: j.visitAt ? j.visitAt.toISOString() : null,
+      lostReason: j.lostReason,
+    }));
   } catch {
-    return null;
+    dbDown = true;
   }
-}
 
-function StatusPill({ tone, label }: { tone: "ok" | "wait"; label: string }) {
-  if (tone === "ok") {
-    return (
-      <span className="rounded-full border border-[#8EC63D]/50 bg-[#F4F9EA] px-2.5 py-0.5 text-xs font-medium text-[#3f6b12]">
-        {label}
-      </span>
-    );
-  }
-  return (
-    <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-500">
-      {label}
-    </span>
-  );
-}
-
-export default async function Home() {
-  const c = await counts();
+  const terminalIds = new Set(stages.filter((s) => s.isTerminal).map((s) => s.id));
+  const live = jobs.filter((j) => !terminalIds.has(j.stageId)).length;
 
   return (
-    <div>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
-        Build progress
-      </p>
-
-      <section className="mt-3 rounded-md border border-neutral-200 border-l-[3px] border-l-[#8EC63D] bg-white p-5 shadow-sm">
-        <div className="flex items-center gap-3">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#101010] text-sm font-bold text-[#8EC63D]">
-            1
-          </span>
-          <h1 className="text-lg font-bold tracking-tight text-[#101010]">
-            Data foundation
-          </h1>
+    <div className="w-full py-6">
+      <div className="mb-4 flex items-center justify-between gap-3 px-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+            Job board
+          </p>
+          <p className="mt-0.5 text-sm text-neutral-500">
+            {live} live {live === 1 ? "job" : "jobs"} on the books
+          </p>
         </div>
-
-        <ul className="mt-5 space-y-3 text-sm text-[#2C2C2A]">
-          <li className="flex items-center justify-between gap-3">
-            <span>Schema</span>
-            {c ? (
-              <StatusPill tone="ok" label="Migrated" />
-            ) : (
-              <StatusPill tone="wait" label="Pending" />
-            )}
-          </li>
-          <li className="flex items-center justify-between gap-3">
-            <span>Job stages</span>
-            {c && c.stages === 9 ? (
-              <StatusPill tone="ok" label="9 seeded" />
-            ) : (
-              <StatusPill tone="wait" label={c ? `${c.stages} of 9` : "Pending"} />
-            )}
-          </li>
-          <li className="flex items-center justify-between gap-3">
-            <span>First job on the books</span>
-            {c && c.jobs >= 1 ? (
-              <StatusPill tone="ok" label="Ref 00001" />
-            ) : (
-              <StatusPill tone="wait" label="Pending" />
-            )}
-          </li>
-        </ul>
-
         <Link
-          href="/data"
-          className="mt-6 inline-block rounded-md bg-[#101010] px-4 py-2 text-sm font-semibold text-[#8EC63D] transition hover:bg-black"
+          href="/jobs/new"
+          className="rounded-md bg-[#8EC63D] px-4 py-2.5 text-sm font-semibold text-[#101010] shadow-sm transition hover:brightness-95"
         >
-          Open the raw data list
+          New enquiry
         </Link>
-      </section>
+      </div>
 
-      <p className="mt-6 text-sm text-neutral-500">
-        Next milestone: M2, the job board. Kanban columns per stage, drag
-        between stages, job detail with notes.
-      </p>
+      {dbDown ? (
+        <p className="mx-4 rounded-md border border-neutral-200 border-l-[3px] border-l-[#8EC63D] bg-white p-5 text-sm shadow-sm">
+          The database is not reachable. Deploys run migrations automatically,
+          so check the latest deployment log on Vercel.
+        </p>
+      ) : (
+        <Board stages={stages} jobs={jobs} now={now} />
+      )}
     </div>
   );
 }
