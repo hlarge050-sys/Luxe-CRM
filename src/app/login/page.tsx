@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useActionState } from "react";
 import { signIn } from "@/lib/session-actions";
 
@@ -12,7 +13,15 @@ export default function LoginPage() {
         <div className="overflow-hidden rounded-md bg-white shadow-lg">
           <div className="h-[3px] bg-[#8EC63D]" />
           <div className="p-7">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+            <Image
+              src="/logo.png"
+              alt="Luxe Landscaping"
+              width={52}
+              height={52}
+              className="mb-4 rounded-md"
+              priority
+            />
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
               Luxe Landscaping Limited
             </p>
             <h1 className="mt-1 text-4xl font-bold tracking-tight text-[#101010]">

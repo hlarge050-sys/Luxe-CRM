@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
@@ -17,9 +18,12 @@ export default async function AppLayout({
       <header className="bg-[#101010]">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
           <div className="flex items-center gap-2.5">
-            <span
-              aria-hidden
-              className="inline-block h-3.5 w-3.5 rounded-full border-[3px] border-[#8EC63D]"
+            <Image
+              src="/logo.png"
+              alt="Luxe Landscaping"
+              width={28}
+              height={28}
+              priority
             />
             <span className="text-[15px] font-bold tracking-tight text-white">
               Luxe CRM
