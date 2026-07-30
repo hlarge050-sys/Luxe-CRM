@@ -1,8 +1,8 @@
 "use client";
 
-// A pipeline lane, Pipedrive style: flat, separated by a hairline, header
-// carrying the stage name with its value total and count, and a quick add
-// straight into the lane.
+// A pipeline lane on the grey board, matched to the screenshots: stage name
+// with its pound total and count in the header, nothing else, cards floating
+// on the grey below. Quick add tucks in from the header plus.
 
 import { useDroppable } from "@dnd-kit/core";
 import { JobCard } from "./job-card";
@@ -31,13 +31,13 @@ export function Lane({
   const { setNodeRef, isOver } = useDroppable({ id: `stage-${stage.id}` });
 
   return (
-    <section className="flex w-[82vw] max-w-[290px] shrink-0 snap-start flex-col border-r border-neutral-200 px-2 last:border-r-0 sm:w-[264px]">
-      <div className="flex items-start justify-between gap-2 border-b-2 border-neutral-200 px-1 pb-2 pt-1">
+    <section className="flex w-[82vw] max-w-[290px] shrink-0 snap-start flex-col border-r border-neutral-200/80 px-2 last:border-r-0 sm:w-[264px]">
+      <div className="flex items-start justify-between gap-2 px-1 pb-2 pt-2">
         <div className="min-w-0">
-          <h2 className="truncate text-[13px] font-semibold text-[#101010]">
+          <h2 className="truncate text-[15px] font-semibold text-[#101010]">
             {stage.name}
           </h2>
-          <p className="text-[11px] text-neutral-500">
+          <p className="mt-0.5 text-xs text-neutral-500">
             £{gbp.format(total)} · {jobs.length}{" "}
             {jobs.length === 1 ? "job" : "jobs"}
           </p>
@@ -46,7 +46,7 @@ export function Lane({
           type="button"
           onClick={onToggleAdd}
           aria-label={`Add a job to ${stage.name}`}
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-lg leading-none text-neutral-400 transition hover:bg-[#F4F9EA] hover:text-[#3f6b12]"
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-lg leading-none text-neutral-400 transition hover:bg-white hover:text-[#3f6b12]"
         >
           +
         </button>
@@ -56,8 +56,8 @@ export function Lane({
 
       <div
         ref={setNodeRef}
-        className={`flex min-h-28 flex-1 flex-col gap-2 py-2 transition-colors ${
-          isOver ? "bg-[#F4F9EA]/70" : ""
+        className={`flex min-h-28 flex-1 flex-col gap-2 rounded-md py-1 transition-colors ${
+          isOver ? "bg-[#F4F9EA]" : ""
         }`}
       >
         {jobs.map((j) => (

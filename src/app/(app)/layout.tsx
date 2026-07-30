@@ -1,9 +1,12 @@
-import Image from "next/image";
-import Link from "next/link";
+// The app shell, restructured to the Pipedrive pattern from Hazz's
+// screenshots: dark icon rail on the left, white top bar with the global
+// search, bottom bar on the phone. Auth guard stays here.
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
-import { signOut } from "@/lib/session-actions";
+import { Rail } from "@/components/shell/rail";
+import { TopBar } from "@/components/shell/topbar";
+import { BottomNav } from "@/components/shell/bottom-nav";
 
 export default async function AppLayout({
   children,
@@ -15,67 +18,16 @@ export default async function AppLayout({
   if (!ok) redirect("/login");
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="bg-[#101010]">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-          <div className="flex items-center gap-2.5">
-            <Image
-              src="/logo.png"
-              alt="Luxe Landscaping"
-              width={28}
-              height={28}
-              priority
-            />
-            <span className="text-[15px] font-bold tracking-tight text-white">
-              Luxe CRM
-            </span>
-          </div>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="text-sm text-neutral-400 transition hover:text-white"
-            >
-              Sign out
-            </button>
-          </form>
-        </div>
-        <div className="h-[3px] bg-[#8EC63D]" />
-      </header>
-
-      <nav className="border-b border-neutral-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center gap-5 px-5">
-          <Link
-            href="/"
-            className="py-2.5 text-sm font-medium text-[#2C2C2A] transition hover:text-[#101010]"
-          >
-            Board
-          </Link>
-          <Link
-            href="/contacts"
-            className="py-2.5 text-sm font-medium text-[#2C2C2A] transition hover:text-[#101010]"
-          >
-            Contacts
-          </Link>
-          <Link
-            href="/data"
-            className="py-2.5 text-sm font-medium text-[#2C2C2A] transition hover:text-[#101010]"
-          >
-            Data
-          </Link>
-          <Link
-            href="/jobs/new"
-            className="my-1.5 ml-auto rounded-md bg-[#8EC63D] px-3 py-1.5 text-[13px] font-semibold text-[#101010] transition hover:brightness-95"
-          >
-            New enquiry
-          </Link>
-        </div>
-      </nav>
-
-      <main className="w-full flex-1">{children}</main>
-
-      <footer className="border-t border-neutral-200 py-6 text-center text-[11px] text-neutral-400">
-        Luxe Landscaping Limited | Co. No. 14902951 | Internal
-      </footer>
+    <div className="min-h-dvh">
+      <Rail />
+      <div className="flex min-h-dvh flex-col sm:pl-16">
+        <TopBar />
+        <main className="w-full flex-1 pb-20 sm:pb-0">{children}</main>
+        <footer className="hidden border-t border-neutral-200 py-5 text-center text-[11px] text-neutral-400 sm:block">
+          Luxe Landscaping Limited | Co. No. 14902951 | Internal
+        </footer>
+      </div>
+      <BottomNav />
     </div>
   );
 }

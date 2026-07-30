@@ -32,7 +32,7 @@ export async function GET() {
       db: "ok",
       schema: "migrated",
       stages,
-      version: "m2r1",
+      version: "m2r2",
     });
   } catch {
     return Response.json(

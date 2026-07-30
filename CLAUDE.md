@@ -8,8 +8,9 @@ Built and accepted milestone by milestone. Owner: Hazz.
 Live at https://luxe-crm-peach.vercel.app
 M0 and M1 accepted by Hazz, 30 July 2026. M2 built 30 July 2026; first cut
 rejected by Hazz for not matching Pipedrive, rebuilt the same day to the
-Pipedrive layout in Luxe colours. Awaiting acceptance by Hazz. Next after
-acceptance: M3, the follow-up engine.
+Pipedrive layout in Luxe colours, then matched to screenshots of his actual
+Pipedrive account that Hazz supplied (see Brand). Awaiting acceptance by
+Hazz. Next after acceptance: M3, the follow-up engine.
 Migrations run automatically on deploy (scripts/migrate.mjs), /api/health
 reports db and schema state publicly.
 
@@ -59,13 +60,20 @@ take over from M6.
 ## Brand
 
 Green #8EC63D, black #101010, ink #2C2C2A, pale green #F4F9EA,
-paper #FAFAF8. Helvetica/Arial. Decided by Hazz at the M2 rework: the APP
-follows Pipedrive's layout and interaction patterns in Luxe colours (flat
-full-width lanes with value totals, white deal cards with value and rotting
-dot, quick add per lane, outcome drop zones, chevron stage bar and split
-detail page). The printed-paperwork styling (numbered badges, green left
-borders) belongs to the DOCUMENTS at M7, not to app screens. Do not restyle
-the app back towards the paperwork.
+paper #FAFAF8. Helvetica/Arial. Decided by Hazz at the M2 rework and then
+matched to screenshots of his real Pipedrive account: the APP follows
+Pipedrive's shell and patterns in Luxe colours. Shell: dark icon rail left
+(logo top, sign out bottom, green active tile), white top bar with page
+title, centred global search (/search) and a round green quick add, bottom
+icon bar on the phone. Board: grey strip #F3F4F1, flat lanes with name plus
+pound total and count, white cards with title, activity indicator right
+(next visit date, or amber warning triangle when nothing is booked), person
+line, avatar icon, red day pill only once stale (7d+, pale red card tint),
+grey pound value, board/list view toggle, quick add per lane, Complete and
+Lost as drop zones plus tabs. Contacts is a Pipedrive-style table. The
+printed-paperwork styling (numbered badges, green left borders) belongs to
+the DOCUMENTS at M7, not to app screens. Do not restyle the app back
+towards the paperwork.
 
 ## Tooling notes
 

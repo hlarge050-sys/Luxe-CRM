@@ -1,10 +1,13 @@
 "use client";
 
-// A job card, Pipedrive anatomy in Luxe colours: title, person, value, and
-// the rotting dot on the right that ambers after a week in a live stage and
-// reds after a fortnight. Parked / waiting is exempt, parked is a decision.
+// A deal card matched to the Pipedrive screenshots: title with the activity
+// indicator on the right (next visit date, or the amber triangle when
+// nothing is booked ahead), person underneath, then avatar, the red day
+// pill once a job has sat still a week, and the value. Rotten cards take
+// the pale red tint. Parked / waiting never rots, parked is a decision.
 
 import { useDraggable } from "@dnd-kit/core";
+import { AvatarIcon, WarningIcon } from "@/components/icons";
 import type { BoardJob, BoardStage } from "./board";
 
 const gbp = new Intl.NumberFormat("en-GB");
@@ -16,14 +19,6 @@ const dateFmt = new Intl.DateTimeFormat("en-GB", {
 
 export function daysIn(now: number, since: string) {
   return Math.max(0, Math.floor((now - +new Date(since)) / 86_400_000));
-}
-
-function dotClass(days: number, stage: BoardStage) {
-  if (stage.isTerminal || stage.name === "Parked / waiting")
-    return "bg-neutral-300";
-  if (days >= 14) return "bg-red-500";
-  if (days >= 7) return "bg-amber-400";
-  return "bg-neutral-300";
 }
 
 export function JobCardBody({
@@ -40,39 +35,51 @@ export function JobCardBody({
   overlay?: boolean;
 }) {
   const d = daysIn(now, job.stageChangedAt);
+  const parked = stage.name === "Parked / waiting";
+  const stale = !stage.isTerminal && !parked && d >= 7;
+  const upcomingVisit =
+    job.visitAt != null && +new Date(job.visitAt) > now ? job.visitAt : null;
+  const nothingBooked = !stage.isTerminal && !parked && upcomingVisit == null;
 
   return (
     <div
-      className={`rounded-[4px] border border-neutral-200 bg-white p-2.5 shadow-sm ${
-        overlay ? "rotate-1 shadow-lg" : ""
-      } ${dragging ? "opacity-40" : ""}`}
+      className={`rounded-lg border p-3 shadow-sm ${
+        stale ? "border-red-100 bg-[#FDF4F4]" : "border-neutral-200 bg-white"
+      } ${overlay ? "rotate-1 shadow-lg" : ""} ${dragging ? "opacity-40" : ""}`}
     >
-      <p className="text-[13px] font-semibold leading-snug text-[#101010]">
-        {job.title}
-      </p>
-      <p className="mt-0.5 truncate text-xs text-neutral-500">
-        {job.contactName}
-        {job.place ? `, ${job.place}` : ""}
-      </p>
-      {job.visitAt ? (
-        <p className="mt-0.5 text-[11px] font-medium text-[#3f6b12]">
-          Visit {dateFmt.format(new Date(job.visitAt))}
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-semibold leading-snug text-[#101010]">
+          {job.title}
         </p>
-      ) : null}
-      <div className="mt-1.5 flex items-center justify-between gap-2">
-        {job.value != null ? (
-          <span className="text-xs font-semibold text-[#3f6b12]">
-            £{gbp.format(job.value)}
-          </span>
-        ) : (
-          <span aria-hidden="true" />
-        )}
-        <span className="flex items-center gap-1 text-[11px] text-neutral-400">
-          {d === 0 ? "Today" : `${d}d`}
+        {upcomingVisit ? (
           <span
-            className={`inline-block h-2 w-2 rounded-full ${dotClass(d, stage)}`}
-            aria-label={`${d} days in ${stage.name}`}
+            className="shrink-0 pt-0.5 text-[11px] font-medium text-neutral-400"
+            title="Next visit"
+          >
+            {dateFmt.format(new Date(upcomingVisit))}
+          </span>
+        ) : nothingBooked ? (
+          <WarningIcon
+            className="h-4 w-4 shrink-0 text-amber-500"
+            aria-label="Nothing booked on this job"
           />
+        ) : null}
+      </div>
+      <p className="mt-0.5 truncate text-[13px] text-neutral-500">
+        {job.contactName}
+      </p>
+      <div className="mt-2 flex items-center gap-1.5">
+        <AvatarIcon className="h-4 w-4 text-neutral-300" />
+        {stale ? (
+          <span
+            className="rounded bg-red-600 px-1.5 py-px text-[11px] font-bold text-white"
+            title={`${d} days in ${stage.name}`}
+          >
+            {d}d
+          </span>
+        ) : null}
+        <span className="text-[13px] text-neutral-500">
+          £{gbp.format(job.value ?? 0)}
         </span>
       </div>
     </div>

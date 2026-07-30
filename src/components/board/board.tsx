@@ -21,8 +21,9 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { moveJobStage } from "@/lib/actions";
+import { BoardIcon, ListIcon, PlusIcon, WarningIcon } from "@/components/icons";
 import { Lane } from "./column";
-import { JobCardBody } from "./job-card";
+import { JobCardBody, daysIn } from "./job-card";
 import { LostReasonDialog } from "./lost-reason-dialog";
 import { ZonesBar } from "./zones-bar";
 
@@ -74,6 +75,7 @@ export function Board({
   const [lostError, setLostError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("pipeline");
+  const [view, setView] = useState<"board" | "list">("board");
   const [openAdds, setOpenAdds] = useState<Record<number, boolean>>({});
   const suppressClick = useRef(false);
 
@@ -262,21 +264,53 @@ export function Board({
     </button>
   );
 
+  const viewBtn = (v: "board" | "list", Icon: typeof BoardIcon, label: string) => (
+    <button
+      type="button"
+      onClick={() => setView(v)}
+      aria-label={label}
+      title={label}
+      className={`flex h-9 w-10 items-center justify-center transition ${
+        view === v
+          ? "bg-[#F4F9EA] text-[#3f6b12]"
+          : "bg-white text-neutral-400 hover:text-neutral-600"
+      }`}
+    >
+      <Icon className="h-4.5 w-4.5" />
+    </button>
+  );
+
   return (
     <div>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 px-4">
-        <div className="flex items-center gap-1 rounded-full border border-neutral-200 bg-white p-1">
-          {tabBtn("pipeline", "Pipeline")}
-          {tabBtn("complete", `Complete ${completeJobs.length}`)}
-          {tabBtn("lost", `Lost ${lostJobs.length}`)}
+      <div className="flex flex-wrap items-center gap-3 px-4 pt-4">
+        <div className="flex divide-x divide-neutral-300 overflow-hidden rounded-md border border-neutral-300">
+          {viewBtn("board", BoardIcon, "Board view")}
+          {viewBtn("list", ListIcon, "List view")}
         </div>
-        <p className="text-[13px] text-neutral-500">
+        <Link
+          href="/jobs/new"
+          className="flex items-center gap-1.5 rounded-md bg-[#8EC63D] px-3.5 py-2 text-sm font-semibold text-[#101010] transition hover:brightness-95"
+        >
+          <PlusIcon className="h-4 w-4" />
+          Job
+        </Link>
+        <p className="ml-auto text-[13px] text-neutral-500">
           <span className="font-semibold text-[#101010]">
             £{gbp.format(pipelineTotal)}
           </span>{" "}
           · {liveJobs.length} live {liveJobs.length === 1 ? "job" : "jobs"}
         </p>
       </div>
+
+      {view === "board" ? (
+        <div className="mt-3 flex items-center gap-1 px-4 pb-3">
+          {tabBtn("pipeline", "Pipeline")}
+          {tabBtn("complete", `Complete ${completeJobs.length}`)}
+          {tabBtn("lost", `Lost ${lostJobs.length}`)}
+        </div>
+      ) : (
+        <div className="pb-3" />
+      )}
 
       {error ? (
         <div className="mx-4 mb-3 flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
@@ -291,7 +325,9 @@ export function Board({
         </div>
       ) : null}
 
-      {tab === "pipeline" ? (
+      {view === "list" ? (
+        <JobsList stages={stages} jobs={jobs} effectiveStage={effectiveStage} now={now} />
+      ) : tab === "pipeline" ? (
         <DndContext
           sensors={sensors}
           collisionDetection={pointerWithin}
@@ -300,7 +336,7 @@ export function Board({
           onDragEnd={onDragEnd}
           onDragCancel={onDragCancel}
         >
-          <div className="flex snap-x overflow-x-auto border-y border-neutral-200 bg-white px-2 pb-4 pt-1">
+          <div className="flex snap-x overflow-x-auto border-y border-neutral-200 bg-[#F3F4F1] px-2 pb-4 pt-1">
             {liveStages.map((s) => (
               <Lane
                 key={s.id}
@@ -337,6 +373,113 @@ export function Board({
         onConfirm={confirmLost}
         onCancel={cancelLost}
       />
+    </div>
+  );
+}
+
+function JobsList({
+  stages,
+  jobs,
+  effectiveStage,
+  now,
+}: {
+  stages: BoardStage[];
+  jobs: BoardJob[];
+  effectiveStage: (j: BoardJob) => number;
+  now: number;
+}) {
+  const stageById = new Map(stages.map((s) => [s.id, s]));
+  const rows = [...jobs].sort((a, b) => {
+    const sa = stageById.get(effectiveStage(a));
+    const sb = stageById.get(effectiveStage(b));
+    if (sa && sb && sa.position !== sb.position) return sa.position - sb.position;
+    return +new Date(a.stageChangedAt) - +new Date(b.stageChangedAt);
+  });
+
+  const th =
+    "whitespace-nowrap px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-500";
+  const td = "border-t border-neutral-100 px-3 py-2.5 align-middle";
+
+  if (rows.length === 0) {
+    return (
+      <p className="px-4 py-10 text-center text-sm text-neutral-400">
+        Nothing on the books yet.
+      </p>
+    );
+  }
+
+  return (
+    <div className="mx-4 mb-8 overflow-x-auto rounded-md border border-neutral-200 bg-white">
+      <table className="w-full min-w-[640px] text-sm">
+        <thead>
+          <tr>
+            <th className={th}>Job</th>
+            <th className={th}>Contact</th>
+            <th className={th}>Stage</th>
+            <th className={th}>Value</th>
+            <th className={th}>In stage</th>
+            <th className={th}>Visit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((j) => {
+            const stage = stageById.get(effectiveStage(j));
+            const d = daysIn(now, j.stageChangedAt);
+            const parked = stage?.name === "Parked / waiting";
+            const stale = stage && !stage.isTerminal && !parked && d >= 7;
+            const upcoming =
+              j.visitAt != null && +new Date(j.visitAt) > now ? j.visitAt : null;
+            return (
+              <tr key={j.id} className="hover:bg-neutral-50">
+                <td className={`${td} font-semibold text-[#101010]`}>
+                  <Link
+                    href={`/jobs/${j.id}`}
+                    className="underline-offset-2 hover:underline"
+                  >
+                    {j.title}
+                  </Link>
+                </td>
+                <td className={`${td} whitespace-nowrap text-neutral-600`}>
+                  {j.contactName}
+                </td>
+                <td className={`${td} whitespace-nowrap`}>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      stage?.isTerminal
+                        ? "bg-neutral-100 text-neutral-500"
+                        : "border border-[#8EC63D]/50 bg-[#F4F9EA] text-[#3f6b12]"
+                    }`}
+                  >
+                    {stage?.name ?? ""}
+                  </span>
+                </td>
+                <td className={`${td} whitespace-nowrap text-neutral-600`}>
+                  £{gbp.format(j.value ?? 0)}
+                </td>
+                <td
+                  className={`${td} whitespace-nowrap ${
+                    stale ? "font-semibold text-red-600" : "text-neutral-500"
+                  }`}
+                >
+                  {d === 0 ? "Today" : `${d}d`}
+                </td>
+                <td className={`${td} whitespace-nowrap text-neutral-500`}>
+                  {upcoming ? (
+                    rowDate.format(new Date(upcoming))
+                  ) : stage && !stage.isTerminal && !parked ? (
+                    <span className="inline-flex items-center gap-1 text-amber-600">
+                      <WarningIcon className="h-3.5 w-3.5" />
+                      None
+                    </span>
+                  ) : (
+                    ""
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
