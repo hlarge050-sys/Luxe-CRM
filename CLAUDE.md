@@ -3,6 +3,11 @@
 Internal, single-user CRM for Luxe Landscaping Limited (Co. No. 14902951).
 Built and accepted milestone by milestone. Owner: Hazz.
 
+## Status
+
+Live at https://luxe-crm-peach.vercel.app
+M0 accepted by Hazz on 30 July 2026. Next up: M1, not started.
+
 ## Working rules
 
 - Strict milestone order, M0 to M10. A milestone starts only after the previous
