@@ -6,7 +6,8 @@ Built and accepted milestone by milestone. Owner: Hazz.
 ## Status
 
 Live at https://luxe-crm-peach.vercel.app
-M0 accepted 30 July 2026. M1 built 30 July 2026, awaiting acceptance by Hazz.
+M0 and M1 accepted by Hazz, 30 July 2026. Next up: M2, the job board, not
+started.
 Migrations run automatically on deploy (scripts/migrate.mjs), /api/health
 reports db and schema state publicly.
 
@@ -38,7 +39,7 @@ src/app/(app)/layout.tsx. New pages go inside the (app) route group.
 
 ## Milestones
 
-M0 scaffold (done) · M1 data foundation (built, see src/db/schema.ts)
+M0 scaffold (done) · M1 data foundation (done, see src/db/schema.ts)
 · M2 job board kanban · M3 follow-up engine (Inngest)
 · M4 takeoff · M5 pricing engine (pure, versioned function) · M6 quote builder
 · M7 documents (weasyprint) · M8 staged works · M9 Gmail · M10 Calendar.
