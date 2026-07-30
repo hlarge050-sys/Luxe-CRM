@@ -6,7 +6,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { eq, ilike } from "drizzle-orm";
 import { getDb } from "@/db";
 import { activities, contacts, jobs } from "@/db/schema";
 
@@ -21,6 +21,17 @@ function text(form: FormData, key: string): string | null {
   if (typeof v !== "string") return null;
   const t = v.trim();
   return t.length ? t : null;
+}
+
+// Whole pounds. Strips the pound sign, commas and anything else typed around
+// the number, and refuses silly figures.
+function parseValue(raw: string | null): number | null {
+  if (!raw) return null;
+  const digits = raw.replace(/[^0-9]/g, "");
+  if (!digits) return null;
+  const n = Number(digits);
+  if (!Number.isSafeInteger(n) || n <= 0 || n > 10_000_000) return null;
+  return n;
 }
 
 function parseWhen(iso: string | null): Date | null {
@@ -136,6 +147,7 @@ export async function createEnquiry(
       title,
       stageId: stage.id,
       source: text(form, "source"),
+      valueEstimate: parseValue(text(form, "value")),
       visitAt,
       siteAddressLine1: siteSame ? null : text(form, "siteAddressLine1"),
       siteTown: siteSame ? null : text(form, "siteTown"),
@@ -161,6 +173,64 @@ export async function createEnquiry(
 }
 
 // ---------------------------------------------------------------------------
+// Quick add, Pipedrive style: title, contact and a rough value typed straight
+// into a lane. Reuses a contact when the name matches exactly one on file,
+// otherwise creates one.
+// ---------------------------------------------------------------------------
+export async function quickAddJob(
+  stageId: number,
+  _prev: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const db = getDb();
+
+  const stage = await db.query.jobStages.findFirst({
+    where: (t, { eq: is }) => is(t.id, stageId),
+  });
+  if (!stage || stage.isTerminal) return { error: "Pick a live stage." };
+
+  const title = text(form, "title");
+  if (!title) return { error: "The job needs a title." };
+  const contactName = text(form, "contactName");
+  if (!contactName) return { error: "The job needs a contact name." };
+
+  const matches = await db
+    .select({ id: contacts.id })
+    .from(contacts)
+    .where(ilike(contacts.name, contactName));
+
+  let contactId: number;
+  if (matches.length === 1) {
+    contactId = matches[0].id;
+  } else {
+    const [row] = await db
+      .insert(contacts)
+      .values({ name: contactName })
+      .returning({ id: contacts.id });
+    contactId = row.id;
+  }
+
+  const [job] = await db
+    .insert(jobs)
+    .values({
+      contactId,
+      title,
+      stageId: stage.id,
+      valueEstimate: parseValue(text(form, "value")),
+    })
+    .returning({ id: jobs.id });
+
+  await db.insert(activities).values({
+    jobId: job.id,
+    kind: "system",
+    body: `Added from the board into ${stage.name}.`,
+  });
+
+  revalidatePath("/");
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------
 // Edits.
 // ---------------------------------------------------------------------------
 export async function updateJob(
@@ -182,6 +252,7 @@ export async function updateJob(
     .set({
       title,
       source: text(form, "source"),
+      valueEstimate: parseValue(text(form, "value")),
       visitAt: parseWhen(text(form, "visitAt")),
       siteAddressLine1: text(form, "siteAddressLine1"),
       siteTown: text(form, "siteTown"),

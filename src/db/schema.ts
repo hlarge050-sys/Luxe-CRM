@@ -92,6 +92,9 @@ export const jobs = pgTable(
     siteTown: text("site_town"),
     sitePostcode: text("site_postcode"),
     source: text("source"),
+    // Rough figure in whole pounds, typed by hand for the board. The real
+    // computed quote replaces its role from M6.
+    valueEstimate: integer("value_estimate"),
     visitAt: timestamp("visit_at", { withTimezone: true }),
     lostReason: text("lost_reason"),
     stageChangedAt: timestamp("stage_changed_at", { withTimezone: true })

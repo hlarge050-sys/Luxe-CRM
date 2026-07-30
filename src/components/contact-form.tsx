@@ -31,7 +31,7 @@ export function ContactForm({
   return (
     <form
       action={formAction}
-      className="space-y-3 rounded-md border border-neutral-200 border-l-[3px] border-l-[#8EC63D] bg-white p-4 shadow-sm"
+      className="space-y-3 rounded-[4px] border border-neutral-200 bg-white p-4"
     >
       <label className={label}>
         Name

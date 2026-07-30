@@ -1,14 +1,15 @@
-// Job detail: everything about one job on one phone screen. Stage at the
-// top because that is the thing that changes, timeline at the bottom because
-// that is the thing that grows.
+// Job detail, Pipedrive deal-page shape: chevron stage bar and outcome
+// buttons up top, details on the left, the timeline with its composer
+// pinned on the right. Stacks on a phone.
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db";
-import { StageSelect } from "@/components/stage-select";
+import { StageControls } from "@/components/stage-bar";
 import { NoteForm } from "@/components/note-form";
 
 export const dynamic = "force-dynamic";
 
+const gbp = new Intl.NumberFormat("en-GB");
 const dayFmt = new Intl.DateTimeFormat("en-GB", {
   day: "2-digit",
   month: "short",
@@ -42,8 +43,7 @@ function kindChip(kind: string) {
   return "border border-neutral-200 bg-white text-neutral-600";
 }
 
-const card =
-  "rounded-md border border-neutral-200 border-l-[3px] border-l-[#8EC63D] bg-white p-4 shadow-sm";
+const block = "rounded-[4px] border border-neutral-200 bg-white p-4";
 const eyebrow =
   "text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500";
 
@@ -85,7 +85,7 @@ export default async function JobPage({
     .join(", ");
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-5 py-10">
+    <div className="mx-auto w-full max-w-5xl px-5 py-6">
       <div className="flex items-center gap-2">
         <p className={eyebrow}>Job</p>
         {job.reference ? (
@@ -96,9 +96,20 @@ export default async function JobPage({
       </div>
 
       <div className="mt-1 flex items-start justify-between gap-3">
-        <h1 className="text-xl font-bold tracking-tight text-[#101010]">
-          {job.title}
-        </h1>
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold tracking-tight text-[#101010]">
+            {job.title}
+          </h1>
+          <p className="mt-0.5 text-sm text-neutral-500">
+            {job.valueEstimate != null ? (
+              <span className="font-semibold text-[#3f6b12]">
+                £{gbp.format(job.valueEstimate)}
+              </span>
+            ) : null}
+            {job.valueEstimate != null ? " · " : ""}
+            {job.contact.name}
+          </p>
+        </div>
         <Link
           href={`/jobs/${job.id}/edit`}
           className="shrink-0 text-sm font-medium text-[#3f6b12] underline-offset-2 hover:underline"
@@ -107,19 +118,17 @@ export default async function JobPage({
         </Link>
       </div>
 
-      <section className={`${card} mt-4`}>
-        <p className={eyebrow}>Stage</p>
-        <div className="mt-2">
-          <StageSelect
-            jobId={job.id}
-            stages={stages.map((s) => ({
-              id: s.id,
-              name: s.name,
-              position: s.position,
-            }))}
-            currentStageId={job.stageId}
-          />
-        </div>
+      <section className={`${block} mt-4`}>
+        <StageControls
+          jobId={job.id}
+          stages={stages.map((s) => ({
+            id: s.id,
+            name: s.name,
+            position: s.position,
+            isTerminal: s.isTerminal,
+          }))}
+          currentStageId={job.stageId}
+        />
         <p className="mt-2 text-xs text-neutral-400">
           In this stage since {dayFmt.format(job.stageChangedAt)}
         </p>
@@ -130,101 +139,113 @@ export default async function JobPage({
         ) : null}
       </section>
 
-      <section className={`${card} mt-4`}>
-        <p className={eyebrow}>Contact</p>
-        <p className="mt-2 text-[15px] font-semibold text-[#101010]">
-          <Link
-            href={`/contacts/${job.contact.id}`}
-            className="underline-offset-2 hover:underline"
-          >
-            {job.contact.name}
-          </Link>
-        </p>
-        <div className="mt-1 space-y-0.5 text-sm text-[#2C2C2A]">
-          {job.contact.phone ? (
-            <p>
-              <a
-                href={`tel:${job.contact.phone}`}
-                className="text-[#3f6b12] underline-offset-2 hover:underline"
+      <div className="mt-4 gap-4 sm:grid sm:grid-cols-[300px_1fr] sm:items-start">
+        <div className="space-y-4">
+          <section className={block}>
+            <p className={eyebrow}>Contact</p>
+            <p className="mt-2 text-[15px] font-semibold text-[#101010]">
+              <Link
+                href={`/contacts/${job.contact.id}`}
+                className="underline-offset-2 hover:underline"
               >
-                {job.contact.phone}
-              </a>
+                {job.contact.name}
+              </Link>
             </p>
-          ) : null}
-          {job.contact.email ? (
-            <p>
-              <a
-                href={`mailto:${job.contact.email}`}
-                className="text-[#3f6b12] underline-offset-2 hover:underline"
-              >
-                {job.contact.email}
-              </a>
-            </p>
-          ) : null}
-          {contactAddress ? (
-            <p className="text-neutral-500">{contactAddress}</p>
-          ) : null}
-        </div>
-      </section>
-
-      <section className={`${card} mt-4`}>
-        <p className={eyebrow}>Details</p>
-        <dl className="mt-2 space-y-2 text-sm">
-          <div className="flex justify-between gap-3">
-            <dt className="text-neutral-500">Site</dt>
-            <dd className="text-right text-[#2C2C2A]">
-              {site || "At the contact address"}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-neutral-500">Visit</dt>
-            <dd className="text-right text-[#2C2C2A]">
-              {job.visitAt ? stampFmt.format(job.visitAt) : "Not booked"}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-neutral-500">Source</dt>
-            <dd className="text-right text-[#2C2C2A]">{job.source ?? "Not sure"}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-neutral-500">Added</dt>
-            <dd className="text-right text-[#2C2C2A]">
-              {dayFmt.format(job.createdAt)}
-            </dd>
-          </div>
-        </dl>
-      </section>
-
-      <h2 className={`${eyebrow} mt-8`}>Timeline</h2>
-      <div className="mt-2">
-        <NoteForm jobId={job.id} />
-      </div>
-
-      <ul className="mt-3 space-y-2">
-        {job.activities.map((a) => (
-          <li
-            key={a.id}
-            className="rounded-md border border-neutral-200 bg-white p-3 shadow-sm"
-          >
-            <div className="flex items-center gap-2 text-[11px] text-neutral-400">
-              <span
-                className={`rounded-full px-2 py-0.5 font-medium ${kindChip(a.kind)}`}
-              >
-                {kindLabels[a.kind] ?? a.kind}
-              </span>
-              <span>{stampFmt.format(a.occurredAt)}</span>
+            <div className="mt-1 space-y-0.5 text-sm text-[#2C2C2A]">
+              {job.contact.phone ? (
+                <p>
+                  <a
+                    href={`tel:${job.contact.phone}`}
+                    className="text-[#3f6b12] underline-offset-2 hover:underline"
+                  >
+                    {job.contact.phone}
+                  </a>
+                </p>
+              ) : null}
+              {job.contact.email ? (
+                <p>
+                  <a
+                    href={`mailto:${job.contact.email}`}
+                    className="text-[#3f6b12] underline-offset-2 hover:underline"
+                  >
+                    {job.contact.email}
+                  </a>
+                </p>
+              ) : null}
+              {contactAddress ? (
+                <p className="text-neutral-500">{contactAddress}</p>
+              ) : null}
             </div>
-            <p className="mt-1.5 whitespace-pre-wrap text-sm text-[#2C2C2A]">
-              {a.body}
-            </p>
-          </li>
-        ))}
-        {job.activities.length === 0 ? (
-          <li className="rounded-md border border-dashed border-neutral-200 p-4 text-center text-sm text-neutral-400">
-            Nothing on the timeline yet.
-          </li>
-        ) : null}
-      </ul>
+          </section>
+
+          <section className={block}>
+            <p className={eyebrow}>Details</p>
+            <dl className="mt-2 space-y-2 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-neutral-500">Value</dt>
+                <dd className="text-right font-semibold text-[#3f6b12]">
+                  {job.valueEstimate != null
+                    ? `£${gbp.format(job.valueEstimate)}`
+                    : "Not set"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-neutral-500">Site</dt>
+                <dd className="text-right text-[#2C2C2A]">
+                  {site || "At the contact address"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-neutral-500">Visit</dt>
+                <dd className="text-right text-[#2C2C2A]">
+                  {job.visitAt ? stampFmt.format(job.visitAt) : "Not booked"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-neutral-500">Source</dt>
+                <dd className="text-right text-[#2C2C2A]">
+                  {job.source ?? "Not sure"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-neutral-500">Added</dt>
+                <dd className="text-right text-[#2C2C2A]">
+                  {dayFmt.format(job.createdAt)}
+                </dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+
+        <div className="mt-4 sm:mt-0">
+          <NoteForm jobId={job.id} />
+          <ul className="mt-3 space-y-2">
+            {job.activities.map((a) => (
+              <li
+                key={a.id}
+                className="rounded-[4px] border border-neutral-200 bg-white p-3"
+              >
+                <div className="flex items-center gap-2 text-[11px] text-neutral-400">
+                  <span
+                    className={`rounded-full px-2 py-0.5 font-medium ${kindChip(a.kind)}`}
+                  >
+                    {kindLabels[a.kind] ?? a.kind}
+                  </span>
+                  <span>{stampFmt.format(a.occurredAt)}</span>
+                </div>
+                <p className="mt-1.5 whitespace-pre-wrap text-sm text-[#2C2C2A]">
+                  {a.body}
+                </p>
+              </li>
+            ))}
+            {job.activities.length === 0 ? (
+              <li className="rounded-[4px] border border-dashed border-neutral-200 p-4 text-center text-sm text-neutral-400">
+                Nothing on the timeline yet.
+              </li>
+            ) : null}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }

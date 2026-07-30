@@ -15,7 +15,7 @@ export function NoteForm({ jobId }: { jobId: number }) {
   return (
     <form
       action={formAction}
-      className="rounded-md border border-neutral-200 bg-white p-3 shadow-sm"
+      className="rounded-[4px] border border-neutral-200 bg-white p-3"
     >
       <div className="flex gap-2">
         <select

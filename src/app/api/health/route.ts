@@ -27,7 +27,13 @@ export async function GET() {
   try {
     const rows = await sql`select count(*)::int as n from job_stages`;
     const stages = (rows[0] as { n: number }).n;
-    return Response.json({ ok: true, db: "ok", schema: "migrated", stages });
+    return Response.json({
+      ok: true,
+      db: "ok",
+      schema: "migrated",
+      stages,
+      version: "m2r1",
+    });
   } catch {
     return Response.json(
       { ok: false, db: "ok", schema: "pending" },

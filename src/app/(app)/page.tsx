@@ -37,6 +37,7 @@ export default async function BoardPage() {
       stageId: j.stageId,
       stageChangedAt: j.stageChangedAt.toISOString(),
       contactName: j.contact.name,
+      value: j.valueEstimate,
       place: j.siteTown ?? j.contact.town ?? j.sitePostcode ?? j.contact.postcode,
       visitAt: j.visitAt ? j.visitAt.toISOString() : null,
       lostReason: j.lostReason,
@@ -45,18 +46,12 @@ export default async function BoardPage() {
     dbDown = true;
   }
 
-  const terminalIds = new Set(stages.filter((s) => s.isTerminal).map((s) => s.id));
-  const live = jobs.filter((j) => !terminalIds.has(j.stageId)).length;
-
   return (
     <div className="w-full py-6">
       <div className="mb-4 flex items-center justify-between gap-3 px-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
             Job board
-          </p>
-          <p className="mt-0.5 text-sm text-neutral-500">
-            {live} live {live === 1 ? "job" : "jobs"} on the books
           </p>
         </div>
         <Link

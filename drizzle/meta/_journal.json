@@ -22,6 +22,13 @@
       "when": 1785372998553,
       "tag": "0002_parked_waiting_stage",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785442818354,
+      "tag": "0003_job_value_estimate",
+      "breakpoints": true
     }
   ]
 }

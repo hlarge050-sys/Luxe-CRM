@@ -11,8 +11,7 @@ import { createEnquiry } from "@/lib/actions";
 const input =
   "mt-1 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-base outline-none focus:border-[#8EC63D]";
 const label = "block text-[13px] font-medium text-[#2C2C2A]";
-const card =
-  "rounded-md border border-neutral-200 border-l-[3px] border-l-[#8EC63D] bg-white p-4 shadow-sm";
+const card = "rounded-[4px] border border-neutral-200 bg-white p-4";
 const heading = "text-[15px] font-bold tracking-tight text-[#101010]";
 
 function seg(on: boolean) {
@@ -111,18 +110,29 @@ export function EnquiryForm({
           Job title
           <input name="title" required placeholder="Patio and raised beds" className={input} />
         </label>
-        <label className={`${label} mt-3`}>
-          Where it came from
-          <select name="source" defaultValue="" className={input}>
-            <option value="">Not sure</option>
-            <option>Checkatrade</option>
-            <option>Google</option>
-            <option>Word of mouth</option>
-            <option>Website</option>
-            <option>Returning client</option>
-            <option>Other</option>
-          </select>
-        </label>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <label className={label}>
+            Rough value (£)
+            <input
+              name="value"
+              inputMode="numeric"
+              placeholder="5900"
+              className={input}
+            />
+          </label>
+          <label className={label}>
+            Where it came from
+            <select name="source" defaultValue="" className={input}>
+              <option value="">Not sure</option>
+              <option>Checkatrade</option>
+              <option>Google</option>
+              <option>Word of mouth</option>
+              <option>Website</option>
+              <option>Returning client</option>
+              <option>Other</option>
+            </select>
+          </label>
+        </div>
         <label className={`${label} mt-3`}>
           Site visit
           <input

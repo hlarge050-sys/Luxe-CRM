@@ -47,6 +47,7 @@ export default async function EditJobPage({
             id: job.id,
             title: job.title,
             source: job.source,
+            valueEstimate: job.valueEstimate,
             visitAt: job.visitAt ? job.visitAt.toISOString() : null,
             siteAddressLine1: job.siteAddressLine1,
             siteTown: job.siteTown,

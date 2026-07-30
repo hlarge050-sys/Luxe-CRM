@@ -1,67 +1,71 @@
 "use client";
 
-// One stage, one column. The header mirrors the stage cards on the printed
-// Luxe paperwork: black numbered badge, green left border. Lost sits at the
-// end in grey, deliberately drab.
+// A pipeline lane, Pipedrive style: flat, separated by a hairline, header
+// carrying the stage name with its value total and count, and a quick add
+// straight into the lane.
 
 import { useDroppable } from "@dnd-kit/core";
 import { JobCard } from "./job-card";
+import { QuickAddForm } from "./quick-add-form";
 import type { BoardJob, BoardStage } from "./board";
 
-export function BoardColumn({
+const gbp = new Intl.NumberFormat("en-GB");
+
+export function Lane({
   stage,
   jobs,
+  total,
   now,
   onOpen,
+  addOpen,
+  onToggleAdd,
 }: {
   stage: BoardStage;
   jobs: BoardJob[];
+  total: number;
   now: number;
   onOpen: (jobId: number) => void;
+  addOpen: boolean;
+  onToggleAdd: () => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `stage-${stage.id}` });
-  const lost = stage.name === "Lost";
 
   return (
-    <section
-      className={`w-[82vw] max-w-[290px] shrink-0 snap-start self-start rounded-md border border-neutral-200 border-l-[3px] bg-white shadow-sm sm:w-[272px] ${
-        lost ? "border-l-neutral-300" : "border-l-[#8EC63D]"
-      }`}
-    >
-      <header className="flex items-center gap-2 border-b border-neutral-100 px-3 py-2.5">
-        <span
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-            lost ? "bg-neutral-200 text-neutral-600" : "bg-[#101010] text-[#8EC63D]"
-          }`}
+    <section className="flex w-[82vw] max-w-[290px] shrink-0 snap-start flex-col border-r border-neutral-200 px-2 last:border-r-0 sm:w-[264px]">
+      <div className="flex items-start justify-between gap-2 border-b-2 border-neutral-200 px-1 pb-2 pt-1">
+        <div className="min-w-0">
+          <h2 className="truncate text-[13px] font-semibold text-[#101010]">
+            {stage.name}
+          </h2>
+          <p className="text-[11px] text-neutral-500">
+            £{gbp.format(total)} · {jobs.length}{" "}
+            {jobs.length === 1 ? "job" : "jobs"}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onToggleAdd}
+          aria-label={`Add a job to ${stage.name}`}
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-lg leading-none text-neutral-400 transition hover:bg-[#F4F9EA] hover:text-[#3f6b12]"
         >
-          {stage.position}
-        </span>
-        <h2 className="truncate text-[13px] font-bold tracking-tight text-[#101010]">
-          {stage.name}
-        </h2>
-        <span className="ml-auto rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
-          {jobs.length}
-        </span>
-      </header>
+          +
+        </button>
+      </div>
+
+      {addOpen ? <QuickAddForm stageId={stage.id} onClose={onToggleAdd} /> : null}
 
       <div
         ref={setNodeRef}
-        className={`flex min-h-24 flex-col gap-2 p-2 transition-colors ${
-          isOver ? "bg-[#F4F9EA]" : ""
+        className={`flex min-h-28 flex-1 flex-col gap-2 py-2 transition-colors ${
+          isOver ? "bg-[#F4F9EA]/70" : ""
         }`}
       >
         {jobs.map((j) => (
           <JobCard key={j.id} job={j} stage={stage} now={now} onOpen={onOpen} />
         ))}
-        {jobs.length === 0 ? (
-          <p
-            className={`m-1 rounded border border-dashed px-2 py-3 text-center text-[11px] ${
-              isOver
-                ? "border-[#8EC63D] text-[#3f6b12]"
-                : "border-neutral-200 text-neutral-300"
-            }`}
-          >
-            Nothing here
+        {jobs.length === 0 && isOver ? (
+          <p className="m-1 rounded border border-dashed border-[#8EC63D] px-2 py-3 text-center text-[11px] text-[#3f6b12]">
+            Drop it here
           </p>
         ) : null}
       </div>

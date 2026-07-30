@@ -29,6 +29,7 @@ export function JobForm({
     id: number;
     title: string;
     source: string | null;
+    valueEstimate: number | null;
     visitAt: string | null;
     siteAddressLine1: string | null;
     siteTown: string | null;
@@ -55,7 +56,7 @@ export function JobForm({
   return (
     <form
       action={formAction}
-      className="space-y-3 rounded-md border border-neutral-200 border-l-[3px] border-l-[#8EC63D] bg-white p-4 shadow-sm"
+      className="space-y-3 rounded-[4px] border border-neutral-200 bg-white p-4"
     >
       <input type="hidden" name="visitAt" value={visitIso} />
 
@@ -64,18 +65,30 @@ export function JobForm({
         <input name="title" required defaultValue={job.title} className={input} />
       </label>
 
-      <label className={label}>
-        Where it came from
-        <select name="source" defaultValue={job.source ?? ""} className={input}>
-          <option value="">Not sure</option>
-          <option>Checkatrade</option>
-          <option>Google</option>
-          <option>Word of mouth</option>
-          <option>Website</option>
-          <option>Returning client</option>
-          <option>Other</option>
-        </select>
-      </label>
+      <div className="grid grid-cols-2 gap-3">
+        <label className={label}>
+          Rough value (£)
+          <input
+            name="value"
+            inputMode="numeric"
+            defaultValue={job.valueEstimate ?? ""}
+            placeholder="5900"
+            className={input}
+          />
+        </label>
+        <label className={label}>
+          Where it came from
+          <select name="source" defaultValue={job.source ?? ""} className={input}>
+            <option value="">Not sure</option>
+            <option>Checkatrade</option>
+            <option>Google</option>
+            <option>Word of mouth</option>
+            <option>Website</option>
+            <option>Returning client</option>
+            <option>Other</option>
+          </select>
+        </label>
+      </div>
 
       <label className={label}>
         Site visit

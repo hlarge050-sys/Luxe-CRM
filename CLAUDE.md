@@ -6,8 +6,10 @@ Built and accepted milestone by milestone. Owner: Hazz.
 ## Status
 
 Live at https://luxe-crm-peach.vercel.app
-M0 and M1 accepted by Hazz, 30 July 2026. M2 built and deployed 30 July 2026,
-awaiting acceptance by Hazz. Next after acceptance: M3, the follow-up engine.
+M0 and M1 accepted by Hazz, 30 July 2026. M2 built 30 July 2026; first cut
+rejected by Hazz for not matching Pipedrive, rebuilt the same day to the
+Pipedrive layout in Luxe colours. Awaiting acceptance by Hazz. Next after
+acceptance: M3, the follow-up engine.
 Migrations run automatically on deploy (scripts/migrate.mjs), /api/health
 reports db and schema state publicly.
 
@@ -45,17 +47,25 @@ M0 scaffold (done) · M1 data foundation (done, see src/db/schema.ts)
 · M6 quote builder · M7 documents (weasyprint) · M8 staged works · M9 Gmail
 · M10 Calendar.
 
-M2 stages, in board order: New enquiry, Visit booked, Takeoff done, Quote
-sent, Follow-up, Parked / waiting (added at M2 on Hazz's decision), Accepted,
-In progress, Complete, Lost. Lost demands a reason, enforced in
-src/lib/actions.ts. Stage changes write a stage_change activity.
+M2 stages, in order: New enquiry, Visit booked, Takeoff done, Quote sent,
+Follow-up, Parked / waiting (added at M2 on Hazz's decision), Accepted,
+In progress, Complete, Lost. The eight live stages are board lanes; Complete
+and Lost are drop zones that rise while dragging (Hazz's decision at the M2
+rework) plus their own tabs, never lanes. Lost demands a reason, enforced in
+src/lib/actions.ts. Stage changes write a stage_change activity. Jobs carry
+an optional value_estimate in whole pounds for the board; real quote figures
+take over from M6.
 
 ## Brand
 
 Green #8EC63D, black #101010, ink #2C2C2A, pale green #F4F9EA,
-paper #FAFAF8. Helvetica/Arial. The 3px green rule under the header and the
-stage-card style (black numbered badge, green left border) mirror the printed
-Luxe document pack. The app should look like the paperwork.
+paper #FAFAF8. Helvetica/Arial. Decided by Hazz at the M2 rework: the APP
+follows Pipedrive's layout and interaction patterns in Luxe colours (flat
+full-width lanes with value totals, white deal cards with value and rotting
+dot, quick add per lane, outcome drop zones, chevron stage bar and split
+detail page). The printed-paperwork styling (numbered badges, green left
+borders) belongs to the DOCUMENTS at M7, not to app screens. Do not restyle
+the app back towards the paperwork.
 
 ## Tooling notes
 
