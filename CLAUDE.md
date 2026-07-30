@@ -6,7 +6,9 @@ Built and accepted milestone by milestone. Owner: Hazz.
 ## Status
 
 Live at https://luxe-crm-peach.vercel.app
-M0 accepted by Hazz on 30 July 2026. Next up: M1, not started.
+M0 accepted 30 July 2026. M1 built 30 July 2026, awaiting acceptance by Hazz.
+Migrations run automatically on deploy (scripts/migrate.mjs), /api/health
+reports db and schema state publicly.
 
 ## Working rules
 
@@ -30,13 +32,14 @@ M0 accepted by Hazz on 30 July 2026. Next up: M1, not started.
 Next.js (App Router) + TypeScript, Tailwind v4, Drizzle ORM on Neon Postgres,
 Vercel hosting, Inngest from M3, weasyprint document service at M7.
 Auth: single password. AUTH_PASSWORD checked in a server action, AUTH_SECRET
-signs a JWT session cookie. Guards live in src/middleware.ts and
+signs a JWT session cookie. Guards live in src/proxy.ts and
 src/app/(app)/layout.tsx. New pages go inside the (app) route group.
+/api/health is public by design and carries no business data.
 
 ## Milestones
 
-M0 scaffold (done) · M1 data foundation (Contact, Job, JobStage,
-Activity/Note, FollowUp) · M2 job board kanban · M3 follow-up engine (Inngest)
+M0 scaffold (done) · M1 data foundation (built, see src/db/schema.ts)
+· M2 job board kanban · M3 follow-up engine (Inngest)
 · M4 takeoff · M5 pricing engine (pure, versioned function) · M6 quote builder
 · M7 documents (weasyprint) · M8 staged works · M9 Gmail · M10 Calendar.
 

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
@@ -40,6 +41,23 @@ export default async function AppLayout({
         </div>
         <div className="h-[3px] bg-[#8EC63D]" />
       </header>
+
+      <nav className="border-b border-neutral-200 bg-white">
+        <div className="mx-auto flex max-w-3xl items-center gap-5 px-5">
+          <Link
+            href="/"
+            className="py-2.5 text-sm font-medium text-[#2C2C2A] transition hover:text-[#101010]"
+          >
+            Overview
+          </Link>
+          <Link
+            href="/data"
+            className="py-2.5 text-sm font-medium text-[#2C2C2A] transition hover:text-[#101010]"
+          >
+            Data
+          </Link>
+        </div>
+      </nav>
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-10">
         {children}
